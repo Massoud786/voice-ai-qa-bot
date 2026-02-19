@@ -1,4 +1,4 @@
-import { getTwilioClient } from "./twilioClient";
+import { getTwilioClient } from "./twilioClient.js";
 
 export async function startTestCall(toNumber: string) {
     const from = process.env.TWILIO_FROM_NUMBER;

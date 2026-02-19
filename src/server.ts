@@ -1,12 +1,10 @@
 import express from "express";
-import dotenv from "dotenv";
 import twilio from "twilio";
-import { startTestCall } from "./callRunner";
+import { startTestCall } from "./callRunner.js";
 import fs from "fs";
 import path from "path";
 import axios from "axios";
-
-dotenv.config();
+import { transcribeWav } from "./transcribe.js";
 
 const app = express();
 
@@ -101,6 +99,11 @@ app.post("/twilio/recording-status", async (req, res) => {
         const outPath = path.join("outputs", CallSid, "patient.wav");
         await downloadTwilioRecording(RecordingUrl, outPath);
         console.log("✅ Saved recording:", outPath);
+
+        const transcribePath = path.join("outputs", CallSid, "transcript.txt");
+        const text = await transcribeWav(outPath);
+        await fs.promises.writeFile(transcribePath, text, "utf8");
+        console.log("✅ saved transcript:", transcribePath);
     }
 
     
@@ -122,10 +125,6 @@ app.post("/run", async (_req, res) => {
     catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         res.status(500).json({ok: false, error: message})
-        // Still return 200 so Twilio does not keep retrying
-        res.sendStatus(200);
-
     }
 });
-
 export default app;
