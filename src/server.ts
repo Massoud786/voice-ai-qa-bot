@@ -101,20 +101,31 @@ app.post("/twilio/recording-status", async (req, res) => {
         console.log("✅ Saved recording:", outPath);
 
         const transcribePath = path.join("outputs", CallSid, "transcript.txt");
+
+        try {
         const text = await transcribeWav(outPath);
         await fs.promises.writeFile(transcribePath, text, "utf8");
-        console.log("✅ saved transcript:", transcribePath);
-    }
-
+        console.log("✅ Saved transcript:", transcribePath);
     
-    // response fast so Twilio doesn't retry
-    return res.sendStatus(200);
-}
+    }  
 catch (err) {
-    console.error("recording-status error:",err);
+    const message = err instanceof Error ? err.message : String(err);
+    await fs.promises.writeFile(
+        transcribePath,
+        `TRANSCRIPTION FAILED:\n${message}`,
+        "utf8"
+    );
+    console.error("❌ Transcription failed:", message);
+}
+    }
+    // Always respond 200 so Twilio doesn't retry
     return res.sendStatus(200);
 }
-
+catch(err) {
+    console.error("recording-status handler error:", err);
+    // Still respond 200 to stop retries
+    return res.sendStatus(200);
+}
 });
 
 app.post("/run", async (_req, res) => {
