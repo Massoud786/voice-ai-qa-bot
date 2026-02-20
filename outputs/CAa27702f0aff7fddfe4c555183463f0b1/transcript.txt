@@ -1,1 +1,0 @@
-Hey, I just wanted to let you know that I completed the project and I'm going to implement a new feature which will hear the voice and write a description or provide me with a transcript. And I'll have to call the QA and the manager to accept it. Thank you.
