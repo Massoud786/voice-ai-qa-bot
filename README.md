@@ -101,6 +101,7 @@ Returns:
 
 ## 📊 Example Evaluation Output
 
+```json
 {
   "callSid": "CAxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "createdAt": "2026-02-22T21:28:38.506Z",
@@ -123,6 +124,7 @@ Returns:
     "Polite closing remarks."
   ]
 }
+```
 
 ---
 
