@@ -6,6 +6,7 @@ import path from "path";
 import axios from "axios";
 import { transcribeWav } from "./transcribe.js";
 import { evaluateTranscript } from "./evaluate.js";
+import { error } from "console";
 
 const app = express();
 
@@ -161,6 +162,78 @@ app.post("/twilio/recording-status", async (req, res) => {
     } catch (err) {
         console.error("recording-status handler error:", err);
         return res.sendStatus(200);
+    }
+});
+
+// List all processsed calls.
+app.get("/calls", async (_req, res) => {
+    try {
+        const baseDir = path.resolve("outputs");
+
+        if (!fs.existsSync(baseDir)) {
+            return res.json({ calls: [] });
+        }
+        
+        const entries = await fs.promises.readdir(baseDir,{
+            withFileTypes: true,
+        });
+
+        // Only keep directories (ignore .DS_Store or other files)
+        const callDirs = entries
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
+
+        const calls = await Promise.all(
+            callDirs.map(async (sid) => {
+                const folder = path.join(baseDir, sid);
+                const files = await fs.promises.readdir(folder);
+
+                return {
+                    callSid: sid,
+                    hasAudio: files.includes("patient.wav"),
+                    hasTranscript: files.includes("transcript.txt"),
+                    hasEvaluation: files.includes("evaluation.json"),
+                };
+            })
+        );
+        return res.json({ calls});
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("GET /calls error:", err);
+        return res.status(500).json({ error: message});
+    }
+});
+
+// Return transcript + evaluation 
+app.get("/calls/:callSid", async(req, res) => {
+    try {
+        const { callSid} = req.params;
+        const basePath = path.join("outputs", callSid);
+
+        if ( !fs.existsSync(basePath)) {
+            return res.status(404).json({ error: "Call not found"});
+        }
+        const transcriptPath = path.join(basePath, "transcript.txt");
+        const evaluationPath = path.join(basePath, "evaluation.json");
+
+        const transcript = fs.existsSync(transcriptPath)
+        ? await fs.promises.readFile(transcriptPath, "utf8")
+        : null;
+
+        const evaluation = fs.existsSync(evaluationPath)
+        ? JSON.parse(await fs.promises.readFile(evaluationPath, "utf8"))
+        : null;
+
+        return res.json({
+            callSid,
+            transcript,
+            evaluation,
+        });
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return res.status(500).json({ error: message});
     }
 });
 
