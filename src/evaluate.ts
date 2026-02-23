@@ -1,4 +1,6 @@
-import { openai } from "./openaiClient.js";
+import { getOpenAI } from "./openaiClient.js";
+
+
 
 export type EvaluationResult = {
     callSid: string;
@@ -29,6 +31,7 @@ function safeJsonParse<T>(text: string): T | null {
 }
 
 export async function evaluateTranscript(callSid: string, transcript: string): Promise<EvaluationResult> {
+    const openai = getOpenAI();
     if (!process.env.OPENAI_API_KEY) {
         throw new Error("Missing OPENAI_API_KEY in .env");
     }

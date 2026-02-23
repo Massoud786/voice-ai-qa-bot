@@ -10,7 +10,7 @@
     "module": "nodenext",
     "target": "esnext",
     "types": ["node", "jest"],
-    "moduleResolution": "nodenext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     // For nodejs:

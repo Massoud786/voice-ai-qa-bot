@@ -1,7 +1,8 @@
 import fs from "fs";
-import { openai } from "./openaiClient.js";
+import { getOpenAI } from "./openaiClient.js";
 
 export async function transcribeWav(filePath: string): Promise<string> {
+    const openai = getOpenAI();
     
     const result = await openai.audio.transcriptions.create({
         file: fs.createReadStream(filePath),
