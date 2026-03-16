@@ -1,6 +1,6 @@
 # Voice AI QA Harness
 
-End-to-end voice testing harness that simulates patient calls, records conversations, generates transcripts, and evaluates conversational quality using AI.
+End-to-end voice AI testing harness that simulates user calls, records conversations, generates transcript, and identifies quality issues in converstaional agents.  
 
 ## 🚀 Overview
 
